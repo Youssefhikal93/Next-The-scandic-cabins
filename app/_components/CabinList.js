@@ -4,9 +4,11 @@ import CabinCard from "./CabinCard";
 
 export async function CabinList({ filter }) {
   await connection();
+  // Everything below will be excluded from prerendering
 
   const cabins = await getCabins();
   if (!cabins) return null;
+
   let displayedCabins;
   if (filter === "all") displayedCabins = cabins;
   if (filter === "small")

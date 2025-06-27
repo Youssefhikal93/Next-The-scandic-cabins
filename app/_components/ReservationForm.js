@@ -3,11 +3,15 @@ import { differenceInDays } from "date-fns";
 import { useReservation } from "./ReservationContext";
 import { createReservation } from "../_lib/actions";
 import SubmitButton from "./SubmitButton";
+import Image from "next/image";
+import { startTransition, useTransition } from "react";
+import { useRouter } from "next/navigation";
 
 function ReservationForm({ cabin, user }) {
   const { maxCapacity, regularPrice, discount, id } = cabin;
   const { range, resetRange } = useReservation();
-
+  const [isPending, startTransition] = useTransition();
+  const router = useRouter();
   const startDate = range.from;
   const endDate = range.to;
   const numNights = differenceInDays(endDate, startDate);
@@ -22,37 +26,61 @@ function ReservationForm({ cabin, user }) {
   };
 
   const createReservationWithData = createReservation.bind(null, bookingData);
+
+  const handleSubmit = async (formData) => {
+    startTransition(async () => {
+      // both achving the same results
+      await createReservationWithData(formData);
+      // await createReservation(bookingData, formData);
+
+      // Reset range before redirect
+      resetRange();
+      router.push("/cabins/thankyou");
+    });
+  };
   return (
     <div className="scale-[1.01]">
-      <div className="bg-primary-800 text-primary-300 px-16 py-2 flex justify-between items-center">
-        <p>Logged in as</p>
+      {/* User Info Bar */}
+      <div className="bg-primary-800 text-primary-300 mt-2 md:mt-0 px-4 md:px-8 min-h-20 lg:px-16 py-2 flex justify-between items-center">
+        <p className="text-sm md:text-base">Logged in as</p>
 
-        <div className="flex gap-4 items-center">
-          <img
-            // Important to display google profile images
-            referrerPolicy="no-referrer"
-            className="h-8 rounded-full"
-            src={user.image}
-            alt={user.name}
-          />
-          <p>{user.name}</p>
+        <div className="flex gap-2 md:gap-4 items-center">
+          <div className="relative h-6 w-6 md:h-8 md:w-8">
+            <Image
+              // Important to display google profile images
+              referrerPolicy="no-referrer"
+              className="rounded-full object-cover"
+              src={user.image}
+              alt={user.name}
+              fill
+              sizes="(max-width: 768px) 24px, 32px"
+            />
+          </div>
+          <p className="text-sm md:text-base truncate max-w-[100px] md:max-w-none">
+            {user.name}
+          </p>
         </div>
       </div>
-      {/* <p>{`${range.from}-${range.to}`}</p> */}
 
+      {/* Reservation Form */}
       <form
-        action={async (formData) => {
-          await createReservationWithData(formData);
-          resetRange();
-        }}
-        className="bg-primary-900 py-10 px-16 text-lg flex gap-5 flex-col"
+        // Redirecting in the action cauing refreshing the page which dosnt affect the state of reset range
+        // action={async (formData) => {
+        //   await createReservationWithData(formData);
+        //   resetRange();
+        // }}
+        action={handleSubmit}
+        className="bg-primary-900 py-6 px-4 sm:py-8 sm:px-8 lg:py-10 lg:px-16 text-base md:text-lg flex gap-4 md:gap-5 flex-col"
       >
-        <div className="space-y-2">
-          <label htmlFor="numGuests">How many guests?</label>
+        {/* Guests Select */}
+        <div className="space-y-1 md:space-y-2">
+          <label htmlFor="numGuests" className="text-sm md:text-base">
+            How many guests?
+          </label>
           <select
             name="numGuests"
             id="numGuests"
-            className="px-5 py-3 bg-primary-200 text-primary-800 w-full shadow-sm rounded-sm"
+            className="px-3 py-2 md:px-5 md:py-3 bg-primary-200 text-primary-800 w-full shadow-sm rounded-sm text-sm md:text-base"
             required
           >
             <option value="" key="">
@@ -66,29 +94,33 @@ function ReservationForm({ cabin, user }) {
           </select>
         </div>
 
-        <div className="space-y-2">
-          <label htmlFor="observations">
+        {/* Observations */}
+        <div className="space-y-1 md:space-y-2">
+          <label htmlFor="observations" className="text-sm md:text-base">
             Anything we should know about your stay?
           </label>
           <textarea
             name="observations"
             id="observations"
-            className="px-5 py-3 bg-primary-200 text-primary-800 w-full shadow-sm rounded-sm"
+            className="px-3 py-2 md:px-5 md:py-3 bg-primary-200 text-primary-800 w-full shadow-sm rounded-sm text-sm md:text-base"
             placeholder="Any pets, allergies, special requirements, etc.?"
+            rows={3}
           />
         </div>
 
-        <div className="flex justify-end items-center gap-6">
+        {/* Submit Area */}
+        <div className="flex flex-col-reverse sm:flex-row justify-between items-center gap-4 mt-4">
           {!(startDate && endDate) ? (
-            <p className="text-primary-300 text-base">
+            <p className="text-primary-300 text-xs sm:text-sm md:text-base">
               Start by selecting dates
             </p>
           ) : (
-            <SubmitButton>Reserve now</SubmitButton>
+            <div className="w-full sm:w-auto">
+              <SubmitButton className="w-full sm:w-auto">
+                Reserve now
+              </SubmitButton>
+            </div>
           )}
-          {/* <button className="bg-accent-500 px-8 py-4 text-primary-800 font-semibold hover:bg-accent-600 transition-all disabled:cursor-not-allowed disabled:bg-gray-500 disabled:text-gray-300">
-            Reserve now
-          </button> */}
         </div>
       </form>
     </div>

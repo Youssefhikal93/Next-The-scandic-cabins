@@ -1,8 +1,6 @@
 import Link from "next/link";
 import { auth } from "../_lib/auth";
 import Image from "next/image";
-import NavigationServer from "./NavigationLinkLogin";
-import NavigationLinkLogin from "./NavigationLinkLogin";
 import MobileButton from "./MobileButton";
 
 export default async function Navigation() {
@@ -44,7 +42,7 @@ export default async function Navigation() {
                   referrerPolicy="no-referrer"
                 />
               </div>
-              <span>Guest area</span>
+              <span>{session.user.name}</span>
             </Link>
           ) : (
             <Link

@@ -1,15 +1,7 @@
 import Cabin from "@/app/_components/Cabin";
 import Reservation from "@/app/_components/Reservation";
 import Spinner from "@/app/_components/Spinner";
-import TextExpander from "@/app/_components/TextExpander";
-import {
-  getBookedDatesByCabinId,
-  getCabin,
-  getCabins,
-  getSettings,
-} from "@/app/_lib/data-service";
-import { EyeSlashIcon, MapPinIcon, UsersIcon } from "@heroicons/react/24/solid";
-import Image from "next/image";
+import { getCabin, getCabins } from "@/app/_lib/data-service";
 import { Suspense } from "react";
 
 export async function generateMetadata({ params }) {
@@ -38,7 +30,7 @@ export default async function Page({ params }) {
       <Cabin cabin={cabin} />
 
       <div>
-        <h2 className="text-5xl font-semibold text-center text-accent-500">
+        <h2 className="text-2xl md:text-4xl font-semibold text-center text-accent-500">
           Reserve {cabin.name} today. Pay on arrival.
           <span className="text-sm mx-2 text-accent-300">
             (Minmum 2 nights)

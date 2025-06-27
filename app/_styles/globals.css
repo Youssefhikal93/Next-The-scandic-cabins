@@ -60,9 +60,10 @@
   --color-accent-950: oklch(0.3 0.06 70);
 }
 
-.rdp {
+/* .rdp {
   --rdp-cell-size: 32px !important;
   --rdp-accent-color: theme("colors.accent.500") !important;
   --rdp-background-color: theme("colors.accent.600") !important;
+
   margin: 0 !important;
-}
+} */

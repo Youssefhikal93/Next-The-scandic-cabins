@@ -36,6 +36,7 @@ export async function updateProfile(formData) {
 
   await updateGuest(session.user.guestId, updatedata);
   revalidatePath("/account/profile");
+  redirect("/account/profile");
 }
 
 export async function deleteReservation(bookingId) {
@@ -94,5 +95,5 @@ export async function createReservation(bookingData, formData) {
   await createBooking(newBooking);
   revalidatePath("/account/reservations");
   revalidatePath(`/cabins/${bookingData.id}`);
-  redirect("/thankyou");
+  // redirect("/cabins/thankyou");
 }

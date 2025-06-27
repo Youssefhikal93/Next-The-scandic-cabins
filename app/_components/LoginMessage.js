@@ -2,18 +2,16 @@ import Link from "next/link";
 
 function LoginMessage() {
   return (
-    <div className="grid border border-l-primary-800 ">
-      <p className="text-center text-xl py-12 self-center">
+    <div className="border border-primary-800 rounded-lg p-4 sm:p-6 bg-primary-950/50">
+      <p className="text-center text-lg sm:text-xl md:text-2xl py-4 sm:py-6">
         Please{" "}
-        <span className="my-5">
-          <Link
-            href="/login"
-            className="text-primary-950 bg-accent-400 px-3 py-2 rounded-b-md mb-4 hover:bg-accent-500 hover:text-white"
-          >
-            login
-          </Link>{" "}
-        </span>
-        to reserve this <br /> cabin right now
+        <Link
+          href="/login"
+          className="inline-block mx-1.5 sm:mx-2 text-primary-950 bg-accent-400 px-4 py-2 sm:px-5 sm:py-2.5 rounded-md hover:bg-accent-500 hover:text-white transition-colors duration-200 text-sm sm:text-base font-medium"
+        >
+          login
+        </Link>
+        to reserve this cabin right now
       </p>
     </div>
   );

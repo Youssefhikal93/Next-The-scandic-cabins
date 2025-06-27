@@ -110,9 +110,9 @@ export default function MobileNavigation({ session }) {
                           referrerPolicy="no-referrer"
                         />
                       </div>
-                      <span>My Account</span>
+                      <span>{session.user.name}</span>
                     </Link>
-                    <SignOutButton />
+                    <SignOutButton>Sign out</SignOutButton>
                   </>
                 ) : (
                   <Link

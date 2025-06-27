@@ -7,7 +7,7 @@ function CabinCard({ cabin }) {
 
   return (
     <div className="flex border-primary-800 border">
-      <div className="flex-1 relative">
+      <div className="flex-1/3 relative">
         <Image
           src={image}
           alt={`Cabin ${name}`}
@@ -24,12 +24,12 @@ function CabinCard({ cabin }) {
 
           <div className="flex gap-3 items-center mb-2">
             <UsersIcon className="h-5 w-5 text-primary-600" />
-            <p className="text-lg text-primary-200">
+            <p className="text-md md:text-lg text-primary-200">
               For up to <span className="font-bold">{maxCapacity}</span> guests
             </p>
           </div>
 
-          <p className="flex gap-3 justify-end items-baseline">
+          <p className="flex gap-3 justify-start mt-2 items-baseline">
             {discount > 0 ? (
               <>
                 <span className="text-3xl font-[350]">
