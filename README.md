@@ -1,36 +1,112 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+Scandic Cabins - Cabin Booking Platform
+A Next.js application featuring cabin bookings with authentication (Google/Facebook).
 
-## Getting Started
+🚀 Live Demo
+Deployed Website: https://scandic-cabins.vercel.app
 
-First, run the development server:
+🌲 Project Overview
+Scandic Cabins is a modern cabin rental platform that allows users to:
 
-```bash
+Browse and book luxury cabins
+
+Create accounts via Google/Facebook or email
+
+Manage bookings and personal profiles
+
+🛖 Cabins Features
+Core Functionality
+Cabin Listings: View available cabins with filters
+
+Booking System: Select dates and book cabins
+
+User Dashboard: Manage bookings and profile
+
+Admin Panel: Manage cabins and bookings (protected)
+Deployed Website: https://the-scandic-cabins-mangement.netlify.app
+
+Technical Features
+Authentication: Google, Facebook, and email/password
+
+Database: Supabase for cabins and bookings data
+
+Payments: Stripe integration (coming soon)
+
+📁 Updated Project Structure
+text
+scandic-cabins/
+├── app/
+│ ├── \_components/
+│ │ └── # Shared UI components
+│ ├── \_lib/
+│ │ ├── # Auth logic
+│ │ ├── # actions
+│ │ └── # cabin-services
+│ ├── cabins/
+│ │ ├── [id]/ # Single cabin page
+│ │ └── page.js # All cabins listing
+│ ├── account/
+│ │ ├── bookings/ # User bookings
+│ │ └── profile/ # Profile management
+├── public/
+│ └── # images
+└── ...
+🛠️ Updated Tech Stack
+Frontend: Next.js 15 (App Router)
+
+Styling: Tailwind CSS + Shadcn UI
+
+Authentication: NextAuth.js (Google, Facebook)
+
+Database: Supabase (PostgreSQL)
+
+Hosting: Vercel
+
+🔧 Setup Instructions (Updated)
+Clone the repository
+
+bash
+git clone https://github.com/youssefhikal93/scandic-cabins.git
+cd scandic-cabins
+Set up environment variables
+
+env
+
+# Supabase
+
+NEXT_PUBLIC_SUPABASE_URL=your-supabase-url
+SUPABASE_SERVICE_KEY=your-supabase-key
+
+Run the development server
+
+bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+📸 Screenshots
+Cabin Listing Page
+https://scandic-cabins.vercel.app/screenshots/cabins.jpg
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Booking Flow
+https://scandic-cabins.vercel.app/screenshots/booking.jpg
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+User Dashboard
+https://scandic-cabins.vercel.app/screenshots/dashboard.jpg
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+🚀 Deployment Notes
+The project is configured for Vercel deployment with:
 
-## Learn More
+Automatic CI/CD from GitHub
 
-To learn more about Next.js, take a look at the following resources:
+Serverless function support for API routes
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Edge caching for cabin images
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Environment variables secured in Vercel dashboard
 
-## Deploy on Vercel
+📈 Next Steps (Roadmap)
+Add Stripe payment integration
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Implement cabin reviews system
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Add favoriting/liking cabins
+
+Mobile app development (React Native)
