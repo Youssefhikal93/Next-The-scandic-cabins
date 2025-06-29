@@ -12,8 +12,15 @@ import {
 } from "./data-service";
 import { redirect } from "next/navigation";
 
-export async function signInAction() {
-  await signIn("google", { redirectTo: "/account" });
+// export async function signInAction() {
+//   await signIn("google", { redirectTo: "/account" });
+// }
+// export async function signInWithFacebook() {
+//   await signIn("facebook", { redirectTo: "/account" });
+// }
+export async function signInAction(formData) {
+  const provider = formData.get("provider");
+  await signIn(provider, { redirectTo: "/account" });
 }
 
 export async function signoutAction() {
