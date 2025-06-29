@@ -19,7 +19,7 @@ export default async function Page() {
         <div className="space-y-4 sm:space-y-6 md:space-y-8">
           <p>
             Where nature&apos;s beauty and comfortable living blend seamlessly.
-            Hidden away in the heart of the noridc lands, this is your paradise
+            Hidden away in the heart of the nordic lands, this is your paradise
             away from home.
           </p>
           <p>
