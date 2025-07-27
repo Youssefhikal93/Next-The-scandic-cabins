@@ -10,7 +10,7 @@ const nextConfig = {
       ),
       new URL("https://lh3.googleusercontent.com/a/**"),
       new URL("https://authjs.dev/img/providers/google.svg"),
-      // new URL("https://platform-lookaside.fbsbx.com/**"),
+      new URL("https://platform-lookaside.fbsbx.com/**"),
       {
         protocol: "https",
         hostname: "platform-lookaside.fbsbx.com",
