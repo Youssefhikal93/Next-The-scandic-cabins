@@ -20,7 +20,7 @@ function SignInButton() {
         <span>Continue with Google</span>
       </button>
 
-  {/*    <button
+  {    <button
         type="submit"
         name="provider"
         value="facebook"
@@ -36,7 +36,7 @@ function SignInButton() {
         </div>
 
         <span>Continue with Facebook</span>
-      </button> */}
+      </button> }
     </div>
   );
 }
