@@ -135,14 +135,22 @@ export async function getSettings() {
 }
 
 export async function getCountries() {
+  // restcountries.com was deprecated and now returns an error object, which
+  // crashed the profile page. flagcdn serves the same country list, and its
+  // flag URLs match the countryFlag values already stored on guests.
   try {
-    const res = await fetch(
-      'https://restcountries.com/v2/all?fields=name,flag'
-    );
-    const countries = await res.json();
-    return countries;
+    const res = await fetch('https://flagcdn.com/en/codes.json');
+    const codes = await res.json();
+    return Object.entries(codes)
+      .filter(([code]) => !code.includes('-')) // skip sub-regions like us-ca
+      .map(([code, name]) => ({
+        name,
+        flag: `https://flagcdn.com/${code}.svg`,
+      }))
+      .sort((a, b) => a.name.localeCompare(b.name));
   } catch {
-    throw new Error('Could not fetch countries');
+    // A broken countries API must never take the profile page down
+    return [];
   }
 }
 
