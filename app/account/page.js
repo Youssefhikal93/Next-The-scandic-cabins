@@ -1,7 +1,7 @@
 import { auth } from "../_lib/auth";
 import { getBookings } from "../_lib/data-service";
 // import { formatDate } from "../_lib/helpers";
-import Image from "next/image";
+import Avatar from "../_components/Avatar";
 
 export const metadata = {
   title: "Guest area",
@@ -21,15 +21,12 @@ export default async function Page() {
 
       {/* User Profile - stacked on mobile */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6 bg-primary-900 p-4 sm:p-6 rounded-lg mb-6">
-        <div className="relative h-14 w-14 sm:h-16 sm:w-16 rounded-full overflow-hidden">
-          <Image
-            src={session?.user.image}
-            alt={session?.user.name}
-            fill
-            className="object-cover"
-            referrerPolicy="no-referrer"
-          />
-        </div>
+        <Avatar
+          name={session?.user.name}
+          image={session?.user.image}
+          sizeClasses="h-14 w-14 sm:h-16 sm:w-16"
+          textClasses="text-lg sm:text-xl"
+        />
         <div className="text-center sm:text-left">
           <h3 className="text-base sm:text-lg font-medium">
             {session?.user.name}

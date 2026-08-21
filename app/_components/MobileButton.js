@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import Image from "next/image";
+import Avatar from "./Avatar";
 import {
   HomeIcon,
   BuildingOffice2Icon,
@@ -94,22 +94,19 @@ export default function MobileNavigation({ session }) {
               </li>
 
               <li className="pt-4 mt-4 border-t border-primary-700">
-                {session?.user?.image ? (
+                {session?.user ? (
                   <>
                     <Link
                       href="/account"
                       className="flex items-center gap-3 py-3 px-4 rounded-lg hover:bg-primary-800 transition-colors"
                       onClick={() => setIsOpen(false)}
                     >
-                      <div className="relative w-6 h-6">
-                        <Image
-                          fill
-                          className="rounded-full object-cover"
-                          src={session.user.image}
-                          alt={session.user.name}
-                          referrerPolicy="no-referrer"
-                        />
-                      </div>
+                      <Avatar
+                        name={session.user.name}
+                        image={session.user.image}
+                        sizeClasses="h-6 w-6"
+                        textClasses="text-[10px]"
+                      />
                       <span>{session.user.name}</span>
                     </Link>
                     <SignOutButton>Sign out</SignOutButton>
