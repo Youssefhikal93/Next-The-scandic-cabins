@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { auth } from "../_lib/auth";
-import Image from "next/image";
+import Avatar from "./Avatar";
 import MobileButton from "./MobileButton";
 
 export default async function Navigation() {
@@ -28,20 +28,16 @@ export default async function Navigation() {
         </li>
         {/* <li>{children}</li> */}
         <li>
-          {session?.user?.image ? (
+          {session?.user ? (
             <Link
               href="/account"
               className="hover:text-accent-400 transition-colors flex items-center gap-4"
             >
-              <div className="flex relative w-10 h-10">
-                <Image
-                  fill
-                  className="rounded-full h-8 object-cover"
-                  src={session.user.image}
-                  alt={session.user.name}
-                  referrerPolicy="no-referrer"
-                />
-              </div>
+              <Avatar
+                name={session.user.name}
+                image={session.user.image}
+                sizeClasses="h-10 w-10"
+              />
               <span>{session.user.name}</span>
             </Link>
           ) : (
