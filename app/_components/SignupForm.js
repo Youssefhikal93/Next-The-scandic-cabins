@@ -54,9 +54,6 @@ function SignupForm() {
       {state?.error && (
         <p className="text-red-400 text-sm text-center">{state.error}</p>
       )}
-      {state?.success && (
-        <p className="text-accent-400 text-sm text-center">{state.success}</p>
-      )}
 
       <button
         type="submit"

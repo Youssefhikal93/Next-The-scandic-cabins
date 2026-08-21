@@ -1,15 +1,16 @@
 "use server";
 
 import { revalidatePath, revalidateTag } from "next/cache";
-import { headers } from "next/headers";
 import { AuthError } from "next-auth";
+import bcrypt from "bcryptjs";
 import { auth, signIn, signOut } from "./auth";
-import { createAuthClient } from "./supabase";
 import {
   createBooking,
+  createGuest,
   deleteBooking,
   getBooking,
   getBookings,
+  getGuest,
   updateBooking,
   updateGuest,
 } from "./data-service";
@@ -66,45 +67,34 @@ export async function signUpAction(prevState, formData) {
   if (password !== passwordConfirm)
     return { error: "Passwords do not match." };
 
-  // The confirmation email must send people back HERE (the guest site).
-  // Without this, Supabase redirects to the project's Site URL — the admin
-  // dashboard. Derived from the request so it works in dev and production.
-  const headersList = await headers();
-  const origin =
-    headersList.get("origin") ?? `https://${headersList.get("host")}`;
+  // Email/password guests live ONLY in the guests table — same as Google
+  // users. Nothing touches Supabase Auth; we store a bcrypt hash on the
+  // guest row and the Credentials provider verifies against it.
+  const normalizedEmail = email.toLowerCase();
+  const passwordHash = await bcrypt.hash(password, 12);
 
-  // Create the account in Supabase Auth (it hashes and stores the password).
-  // role: "guest" marks this as a guest-site account — the management app
-  // refuses to log these users in.
-  const supabaseAuth = createAuthClient();
-  const { error: signUpError } = await supabaseAuth.auth.signUp({
-    email,
-    password,
-    options: {
-      data: { fullName, role: "guest" },
-      emailRedirectTo: `${origin}/login`,
-    },
-  });
+  const existingGuest = await getGuest(normalizedEmail);
 
-  if (signUpError) return { error: signUpError.message };
+  if (existingGuest?.password)
+    return { error: "An account with this email already exists." };
 
-  // Log the new user straight in. The signIn callback in auth.js creates the
-  // matching row in the guests table on first login.
-  try {
-    await signIn("credentials", {
-      email,
-      password,
-      redirectTo: "/account",
+  if (existingGuest) {
+    // Guest row already exists from a Google login — attach a password to it
+    await updateGuest(existingGuest.id, { password: passwordHash });
+  } else {
+    await createGuest({
+      email: normalizedEmail,
+      fullName,
+      password: passwordHash,
     });
-  } catch (error) {
-    if (error instanceof AuthError)
-      // Happens when Supabase requires email confirmation before login
-      return {
-        success:
-          "Account created! Please confirm your email address, then log in.",
-      };
-    throw error;
   }
+
+  // Log the new guest straight in — no confirmation email involved
+  await signIn("credentials", {
+    email: normalizedEmail,
+    password,
+    redirectTo: "/account",
+  });
 }
 
 export async function updateProfile(formData) {
