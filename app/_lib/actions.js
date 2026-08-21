@@ -104,23 +104,48 @@ export async function signUpAction(prevState, formData) {
   });
 }
 
-export async function updateProfile(formData) {
-  // console.log(formData);
+// Returns { error } / { success } to the form instead of throwing — a
+// thrown server action surfaces as the generic production error page.
+export async function updateProfile(prevState, formData) {
   const session = await auth();
-  if (!session) throw new Error("You must be logged in!");
+  if (!session) return { error: "You must be logged in." };
+  if (!session.user.guestId)
+    return {
+      error: "Could not find your guest profile. Log out and back in, then retry.",
+    };
 
-  const nationalID = formData.get("nationalID");
-  const [nationality, countryFlag] = formData.get("nationality").split("%");
+  const nationalID = formData.get("nationalID")?.trim() ?? "";
+  const [nationality, countryFlag] = (formData.get("nationality") ?? "").split(
+    "%"
+  );
 
-  if (!/^[a-zA-Z0-9]{6,18}$/.test(nationalID))
-    throw new Error("Please provide valid national id.");
+  // Optional — but if provided it must look like a real ID. Spaces and
+  // dashes are allowed (e.g. the Swedish personnummer format 900101-1234).
+  if (nationalID && !/^[a-zA-Z0-9 -]{5,20}$/.test(nationalID))
+    return {
+      error:
+        "Please provide a valid national ID (5-20 letters, digits, spaces or dashes).",
+    };
 
-  const updatedata = { nationality, countryFlag, nationalID };
-  // console.log(updatedata);
+  const updatedata = {};
+  if (nationalID) updatedata.nationalID = nationalID;
+  if (nationality) {
+    updatedata.nationality = nationality;
+    updatedata.countryFlag = countryFlag || null;
+  }
 
-  await updateGuest(session.user.guestId, updatedata);
+  if (Object.keys(updatedata).length === 0)
+    return { error: "Nothing to update — pick a country or enter an ID." };
+
+  try {
+    await updateGuest(session.user.guestId, updatedata);
+  } catch (error) {
+    console.error("Profile update failed:", error);
+    return { error: "Your profile could not be updated. Please try again." };
+  }
+
   revalidatePath("/account/profile");
-  redirect("/account/profile");
+  return { success: "Profile updated successfully!" };
 }
 
 export async function deleteReservation(bookingId) {
