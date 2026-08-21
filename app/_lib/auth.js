@@ -69,8 +69,24 @@ const authConfig = {
     },
     //Runs after the creating the session
     async session({ session, user }) {
-      const guest = await getGuest(session?.user.email);
-      session.user.guestId = guest.id;
+      try {
+        let guest = await getGuest(session?.user.email);
+
+        // The guest row can vanish while a session is still alive (e.g. the
+        // management app's reseed wipes the guests table). Recreate it
+        // instead of crashing every server-rendered page.
+        if (!guest) {
+          await createGuest({
+            email: session.user.email,
+            fullName: session.user.name,
+          });
+          guest = await getGuest(session.user.email);
+        }
+
+        session.user.guestId = guest?.id ?? null;
+      } catch {
+        session.user.guestId = null;
+      }
       return session;
     },
   },

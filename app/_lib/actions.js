@@ -73,20 +73,27 @@ export async function signUpAction(prevState, formData) {
   const normalizedEmail = email.toLowerCase();
   const passwordHash = await bcrypt.hash(password, 12);
 
-  const existingGuest = await getGuest(normalizedEmail);
+  try {
+    const existingGuest = await getGuest(normalizedEmail);
 
-  if (existingGuest?.password)
-    return { error: "An account with this email already exists." };
+    if (existingGuest?.password)
+      return { error: "An account with this email already exists." };
 
-  if (existingGuest) {
-    // Guest row already exists from a Google login — attach a password to it
-    await updateGuest(existingGuest.id, { password: passwordHash });
-  } else {
-    await createGuest({
-      email: normalizedEmail,
-      fullName,
-      password: passwordHash,
-    });
+    if (existingGuest) {
+      // Guest row already exists from a Google login — attach a password to it
+      await updateGuest(existingGuest.id, { password: passwordHash });
+    } else {
+      await createGuest({
+        email: normalizedEmail,
+        fullName,
+        password: passwordHash,
+      });
+    }
+  } catch (error) {
+    console.error("Signup failed:", error);
+    return {
+      error: "Could not create your account. Please try again later.",
+    };
   }
 
   // Log the new guest straight in — no confirmation email involved
