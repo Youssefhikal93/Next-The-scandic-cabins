@@ -4,7 +4,7 @@ import Facebook from "next-auth/providers/facebook"
 import Credentials from "next-auth/providers/credentials";
 
 import { createGuest, getGuest } from "./data-service";
-import { supabase } from "./supabase";
+import { createAuthClient } from "./supabase";
 
 const authConfig = {
   providers: [
@@ -26,7 +26,8 @@ const authConfig = {
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) return null;
 
-        const { data, error } = await supabase.auth.signInWithPassword({
+        const supabaseAuth = createAuthClient();
+        const { data, error } = await supabaseAuth.auth.signInWithPassword({
           email: String(credentials.email).trim(),
           password: String(credentials.password),
         });

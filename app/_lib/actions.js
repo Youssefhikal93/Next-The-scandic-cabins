@@ -1,9 +1,10 @@
 "use server";
 
 import { revalidatePath, revalidateTag } from "next/cache";
+import { headers } from "next/headers";
 import { AuthError } from "next-auth";
 import { auth, signIn, signOut } from "./auth";
-import { supabase } from "./supabase";
+import { createAuthClient } from "./supabase";
 import {
   createBooking,
   deleteBooking,
@@ -65,11 +66,24 @@ export async function signUpAction(prevState, formData) {
   if (password !== passwordConfirm)
     return { error: "Passwords do not match." };
 
-  // Create the account in Supabase Auth (it hashes and stores the password)
-  const { error: signUpError } = await supabase.auth.signUp({
+  // The confirmation email must send people back HERE (the guest site).
+  // Without this, Supabase redirects to the project's Site URL — the admin
+  // dashboard. Derived from the request so it works in dev and production.
+  const headersList = await headers();
+  const origin =
+    headersList.get("origin") ?? `https://${headersList.get("host")}`;
+
+  // Create the account in Supabase Auth (it hashes and stores the password).
+  // role: "guest" marks this as a guest-site account — the management app
+  // refuses to log these users in.
+  const supabaseAuth = createAuthClient();
+  const { error: signUpError } = await supabaseAuth.auth.signUp({
     email,
     password,
-    options: { data: { fullName } },
+    options: {
+      data: { fullName, role: "guest" },
+      emailRedirectTo: `${origin}/login`,
+    },
   });
 
   if (signUpError) return { error: signUpError.message };
