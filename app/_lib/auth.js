@@ -2,9 +2,9 @@ import NextAuth from "next-auth";
 import Google from "next-auth/providers/google";
 import Facebook from "next-auth/providers/facebook"
 import Credentials from "next-auth/providers/credentials";
+import bcrypt from "bcryptjs";
 
 import { createGuest, getGuest } from "./data-service";
-import { supabase } from "./supabase";
 
 const authConfig = {
   providers: [
@@ -21,23 +21,27 @@ const authConfig = {
         email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" },
       },
-      // Passwords are verified by Supabase Auth — we never store or hash
-      // them ourselves. NextAuth just owns the session afterwards.
+      // Email/password guests live ONLY in the guests table, exactly like
+      // Google users — nothing is written to Supabase Auth. The password
+      // hash is stored on the guest row and verified here.
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) return null;
 
-        const { data, error } = await supabase.auth.signInWithPassword({
-          email: String(credentials.email).trim(),
-          password: String(credentials.password),
-        });
+        const guest = await getGuest(
+          String(credentials.email).trim().toLowerCase()
+        );
+        // No guest, or a guest created via Google that has no password set
+        if (!guest?.password) return null;
 
-        if (error || !data?.user) return null;
+        const isValid = await bcrypt.compare(
+          String(credentials.password),
+          guest.password
+        );
+        if (!isValid) return null;
 
         return {
-          email: data.user.email,
-          name:
-            data.user.user_metadata?.fullName ??
-            data.user.email.split("@").at(0),
+          email: guest.email,
+          name: guest.fullName ?? guest.email.split("@").at(0),
           image: null,
         };
       },

@@ -2,13 +2,15 @@
 
 import { revalidatePath, revalidateTag } from "next/cache";
 import { AuthError } from "next-auth";
+import bcrypt from "bcryptjs";
 import { auth, signIn, signOut } from "./auth";
-import { supabase } from "./supabase";
 import {
   createBooking,
+  createGuest,
   deleteBooking,
   getBooking,
   getBookings,
+  getGuest,
   updateBooking,
   updateGuest,
 } from "./data-service";
@@ -65,32 +67,34 @@ export async function signUpAction(prevState, formData) {
   if (password !== passwordConfirm)
     return { error: "Passwords do not match." };
 
-  // Create the account in Supabase Auth (it hashes and stores the password)
-  const { error: signUpError } = await supabase.auth.signUp({
-    email,
-    password,
-    options: { data: { fullName } },
-  });
+  // Email/password guests live ONLY in the guests table — same as Google
+  // users. Nothing touches Supabase Auth; we store a bcrypt hash on the
+  // guest row and the Credentials provider verifies against it.
+  const normalizedEmail = email.toLowerCase();
+  const passwordHash = await bcrypt.hash(password, 12);
 
-  if (signUpError) return { error: signUpError.message };
+  const existingGuest = await getGuest(normalizedEmail);
 
-  // Log the new user straight in. The signIn callback in auth.js creates the
-  // matching row in the guests table on first login.
-  try {
-    await signIn("credentials", {
-      email,
-      password,
-      redirectTo: "/account",
+  if (existingGuest?.password)
+    return { error: "An account with this email already exists." };
+
+  if (existingGuest) {
+    // Guest row already exists from a Google login — attach a password to it
+    await updateGuest(existingGuest.id, { password: passwordHash });
+  } else {
+    await createGuest({
+      email: normalizedEmail,
+      fullName,
+      password: passwordHash,
     });
-  } catch (error) {
-    if (error instanceof AuthError)
-      // Happens when Supabase requires email confirmation before login
-      return {
-        success:
-          "Account created! Please confirm your email address, then log in.",
-      };
-    throw error;
   }
+
+  // Log the new guest straight in — no confirmation email involved
+  await signIn("credentials", {
+    email: normalizedEmail,
+    password,
+    redirectTo: "/account",
+  });
 }
 
 export async function updateProfile(formData) {
