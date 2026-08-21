@@ -1,7 +1,9 @@
 "use server";
 
 import { revalidatePath, revalidateTag } from "next/cache";
+import { AuthError } from "next-auth";
 import { auth, signIn, signOut } from "./auth";
+import { supabase } from "./supabase";
 import {
   createBooking,
   deleteBooking,
@@ -25,6 +27,70 @@ export async function signInAction(formData) {
 
 export async function signoutAction() {
   await signOut({ redirectTo: "/" });
+}
+
+// Email + password login. Verification happens in the Credentials provider
+// (auth.js), which checks against Supabase Auth.
+export async function signInWithCredentialsAction(prevState, formData) {
+  const email = formData.get("email");
+  const password = formData.get("password");
+
+  if (!email || !password)
+    return { error: "Please provide both email and password." };
+
+  try {
+    await signIn("credentials", {
+      email,
+      password,
+      redirectTo: "/account",
+    });
+  } catch (error) {
+    if (error instanceof AuthError)
+      return { error: "Invalid email or password." };
+    // signIn throws a redirect on success — let it through
+    throw error;
+  }
+}
+
+export async function signUpAction(prevState, formData) {
+  const fullName = formData.get("fullName")?.trim();
+  const email = formData.get("email")?.trim();
+  const password = formData.get("password");
+  const passwordConfirm = formData.get("passwordConfirm");
+
+  if (!fullName || !email || !password)
+    return { error: "Please fill in all fields." };
+  if (password.length < 8)
+    return { error: "Password must be at least 8 characters." };
+  if (password !== passwordConfirm)
+    return { error: "Passwords do not match." };
+
+  // Create the account in Supabase Auth (it hashes and stores the password)
+  const { error: signUpError } = await supabase.auth.signUp({
+    email,
+    password,
+    options: { data: { fullName } },
+  });
+
+  if (signUpError) return { error: signUpError.message };
+
+  // Log the new user straight in. The signIn callback in auth.js creates the
+  // matching row in the guests table on first login.
+  try {
+    await signIn("credentials", {
+      email,
+      password,
+      redirectTo: "/account",
+    });
+  } catch (error) {
+    if (error instanceof AuthError)
+      // Happens when Supabase requires email confirmation before login
+      return {
+        success:
+          "Account created! Please confirm your email address, then log in.",
+      };
+    throw error;
+  }
 }
 
 export async function updateProfile(formData) {
